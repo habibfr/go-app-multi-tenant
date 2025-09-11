@@ -3,10 +3,13 @@ package providers
 import (
 	"github.com/Caknoooo/go-gin-clean-starter/config"
 	authRepo "github.com/Caknoooo/go-gin-clean-starter/modules/auth/repository"
-	userService "github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/auth/service"
+	tenantController "github.com/Caknoooo/go-gin-clean-starter/modules/tenant/controller"
+	tenantRepo "github.com/Caknoooo/go-gin-clean-starter/modules/tenant/repository"
+	tenantService "github.com/Caknoooo/go-gin-clean-starter/modules/tenant/service"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/controller"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/repository"
+	userService "github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/samber/do"
 	"gorm.io/gorm"
@@ -31,15 +34,22 @@ func RegisterDependencies(injector *do.Injector) {
 
 	// Repository
 	userRepository := repository.NewUserRepository(db)
+	tenantRepository := tenantRepo.NewTenantRepository(db)
 	refreshTokenRepository := authRepo.NewRefreshTokenRepository(db)
 
 	// Service
 	userService := userService.NewUserService(userRepository, refreshTokenRepository, jwtService, db)
+	tenantService := tenantService.NewTenantService(tenantRepository, db)
 
 	// Controller
 	do.Provide(
 		injector, func(i *do.Injector) (controller.UserController, error) {
 			return controller.NewUserController(i, userService), nil
+		},
+	)
+	do.Provide(
+		injector, func(i *do.Injector) (tenantController.TenantController, error) {
+			return tenantController.NewTenantController(i, tenantService), nil
 		},
 	)
 }

@@ -6,12 +6,13 @@ import (
 
 	"github.com/Caknoooo/go-gin-clean-starter/middlewares"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/auth"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/tenant"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user"
 	"github.com/Caknoooo/go-gin-clean-starter/providers"
 	"github.com/Caknoooo/go-gin-clean-starter/script"
 	"github.com/samber/do"
 
-	"github.com/common-nighthawk/go-figure"
+	// "github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,8 +40,8 @@ func run(server *gin.Engine) {
 		serve = ":" + port
 	}
 
-	myFigure := figure.NewColorFigure("Caknoo", "", "green", true)
-	myFigure.Print()
+	// myFigure := figure.NewColorFigure("Hafaro", "", "green", true)
+	// myFigure.Print()
 
 	if err := server.Run(serve); err != nil {
 		log.Fatalf("error running server: %v", err)
@@ -64,6 +65,7 @@ func main() {
 	// Register module routes
 	user.RegisterRoutes(server, injector)
 	auth.RegisterRoutes(server, injector)
+	tenant.RegisterRoutes(server, injector)
 
 	run(server)
 }
