@@ -6,8 +6,15 @@ import (
 )
 
 func Seeder(db *gorm.DB) error {
-	if err := seeds.ListUserSeeder(db); err != nil {
-		return err
+	seeders := []func(*gorm.DB) error{
+		seeds.ListUserSeeder,
+		seeds.ListTenantSeeder,
+	}
+
+	for _, seeder := range seeders {
+		if err := seeder(db); err != nil {
+			return err
+		}
 	}
 
 	return nil
