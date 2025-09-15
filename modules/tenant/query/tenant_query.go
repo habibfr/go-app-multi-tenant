@@ -12,14 +12,17 @@ type Tenant struct {
 
 type TenantFilter struct {
 	pagination.BaseFilter
-	Name string `form:"name"` // tambahkan ini
-
+	Name     string `form:"name"`      // tambahkan ini
+	TenantID string `form:"tenant_id"` // tambahkan ini
 }
 
 func (f *TenantFilter) ApplyFilters(query *gorm.DB) *gorm.DB {
 	// Apply your filters here
 	if f.Name != "" {
 		query = query.Where("name ILIKE ?", "%"+f.Name+"%")
+	}
+	if f.TenantID != "" {
+		query = query.Where("id = ?", f.TenantID)
 	}
 	return query
 }
