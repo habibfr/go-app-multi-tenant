@@ -10,6 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserSeed struct {
+	Name       string `json:"name"`
+	TelpNumber string `json:"telp_number"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Role       string `json:"role"`
+	IsVerified bool   `json:"is_verified"`
+	TenantName string `json:"tenant_name"`
+}
+
 func ListUserSeeder(db *gorm.DB) error {
 	jsonFile, err := os.Open("./database/seeders/json/users.json")
 	if err != nil {
@@ -21,7 +31,7 @@ func ListUserSeeder(db *gorm.DB) error {
 		return err
 	}
 
-	var listUser []entities.User
+	var listUser []UserSeed
 	if err := json.Unmarshal(jsonData, &listUser); err != nil {
 		return err
 	}
@@ -34,6 +44,11 @@ func ListUserSeeder(db *gorm.DB) error {
 	}
 
 	for _, data := range listUser {
+		var tenant entities.Tenant
+		if err := db.Where("name = ?", data.TenantName).First(&tenant).Error; err != nil {
+			return err // tenant tidak ditemukan
+		}
+
 		var user entities.User
 		err := db.Where(&entities.User{Email: data.Email}).First(&user).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -42,7 +57,16 @@ func ListUserSeeder(db *gorm.DB) error {
 
 		isData := db.Find(&user, "email = ?", data.Email).RowsAffected
 		if isData == 0 {
-			if err := db.Create(&data).Error; err != nil {
+			newUser := entities.User{
+				Name:       data.Name,
+				TelpNumber: data.TelpNumber,
+				Email:      data.Email,
+				Password:   data.Password,
+				Role:       data.Role,
+				IsVerified: data.IsVerified,
+				TenantID:   tenant.ID,
+			}
+			if err := db.Create(&newUser).Error; err != nil {
 				return err
 			}
 		}
@@ -50,3 +74,44 @@ func ListUserSeeder(db *gorm.DB) error {
 
 	return nil
 }
+
+// func ListUserSeeder(db *gorm.DB) error {
+// 	jsonFile, err := os.Open("./database/seeders/json/users.json")
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	jsonData, err := io.ReadAll(jsonFile)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	var listUser []entities.User
+// 	if err := json.Unmarshal(jsonData, &listUser); err != nil {
+// 		return err
+// 	}
+
+// 	hasTable := db.Migrator().HasTable(&entities.User{})
+// 	if !hasTable {
+// 		if err := db.Migrator().CreateTable(&entities.User{}); err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	for _, data := range listUser {
+// 		var user entities.User
+// 		err := db.Where(&entities.User{Email: data.Email}).First(&user).Error
+// 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+// 			return err
+// 		}
+
+// 		isData := db.Find(&user, "email = ?", data.Email).RowsAffected
+// 		if isData == 0 {
+// 			if err := db.Create(&data).Error; err != nil {
+// 				return err
+// 			}
+// 		}
+// 	}
+
+// 	return nil
+// }

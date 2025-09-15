@@ -7,8 +7,8 @@ import (
 
 func Seeder(db *gorm.DB) error {
 	seeders := []func(*gorm.DB) error{
-		seeds.ListUserSeeder,
 		seeds.ListTenantSeeder,
+		seeds.ListUserSeeder,
 	}
 
 	for _, seeder := range seeders {

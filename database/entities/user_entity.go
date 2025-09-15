@@ -16,6 +16,9 @@ type User struct {
 	ImageUrl   string    `gorm:"type:varchar(255)" json:"image_url"`
 	IsVerified bool      `gorm:"default:false" json:"is_verified"`
 
+	TenantID uuid.UUID `gorm:"type:uuid;null;index" json:"tenant_id"`
+	Tenant   Tenant    `gorm:"foreignKey:TenantID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"tenant"`
+
 	Timestamp
 }
 
