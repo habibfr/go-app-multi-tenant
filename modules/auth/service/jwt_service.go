@@ -11,16 +11,23 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+type UserTokenInfo struct {
+	TenantID string `json:"tenant_id"`
+	UserID   string `json:"user_id"`
+}
+
 type JWTService interface {
-	GenerateAccessToken(userId string, role string) string
+	GenerateAccessToken(tenantId string, userId string, role string) string
 	GenerateRefreshToken() (string, time.Time)
 	ValidateToken(token string) (*jwt.Token, error)
-	GetUserIDByToken(token string) (string, error)
+	GetUserIDByToken(token string) (*UserTokenInfo, error)
 }
 
 type jwtCustomClaim struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+	TenantID string `json:"tenant_id"`
+	UserID   string `json:"user_id"`
+	Role     string `json:"role"`
+
 	jwt.RegisteredClaims
 }
 
@@ -48,11 +55,12 @@ func getSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateAccessToken(userId string, role string) string {
+func (j *jwtService) GenerateAccessToken(tenantId string, userId string, role string) string {
 	claims := jwtCustomClaim{
-		userId,
-		role,
-		jwt.RegisteredClaims{
+		TenantID: tenantId,
+		UserID:   userId,
+		Role:     role,
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.accessExpiry)),
 			Issuer:    j.issuer,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -92,13 +100,17 @@ func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
 	return jwt.Parse(token, j.parseToken)
 }
 
-func (j *jwtService) GetUserIDByToken(token string) (string, error) {
+func (j *jwtService) GetUserIDByToken(token string) (*UserTokenInfo, error) {
 	tToken, err := j.ValidateToken(token)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	claims := tToken.Claims.(jwt.MapClaims)
-	id := fmt.Sprintf("%v", claims["user_id"])
-	return id, nil
+	userId := fmt.Sprintf("%v", claims["user_id"])
+	tenantId := fmt.Sprintf("%v", claims["tenant_id"])
+	return &UserTokenInfo{
+		UserID:   userId,
+		TenantID: tenantId,
+	}, nil
 }

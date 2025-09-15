@@ -111,12 +111,13 @@ func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (aut
 		return authDto.TokenResponse{}, dto.ErrUserNotFound
 	}
 
-	accessToken := s.jwtService.GenerateAccessToken(user.ID.String(), user.Role)
+	accessToken := s.jwtService.GenerateAccessToken(user.TenantID.String(), user.ID.String(), user.Role)
 	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
 	refreshToken := entities.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    user.ID,
+		TenantID:  user.TenantID,
 		Token:     refreshTokenString,
 		ExpiresAt: expiresAt,
 	}
@@ -143,7 +144,7 @@ func (s *userService) SendVerificationEmail(ctx context.Context, req dto.SendVer
 		return dto.ErrAccountAlreadyVerified
 	}
 
-	verificationToken := s.jwtService.GenerateAccessToken(user.ID.String(), "verification")
+	verificationToken := s.jwtService.GenerateAccessToken(user.TenantID.String(), user.ID.String(), "verification")
 
 	subject := "Email Verification"
 	body := "Please verify your email using this token: " + verificationToken
@@ -157,12 +158,12 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
 	}
 
-	userId, err := s.jwtService.GetUserIDByToken(req.Token)
+	userTokenInfo, err := s.jwtService.GetUserIDByToken(req.Token)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
 	}
 
-	user, err := s.userRepository.GetUserById(ctx, s.db, userId)
+	user, err := s.userRepository.GetUserById(ctx, s.db, userTokenInfo.UserID)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrUserNotFound
 	}
@@ -220,7 +221,7 @@ func (s *userService) RefreshToken(ctx context.Context, req authDto.RefreshToken
 		return authDto.TokenResponse{}, err
 	}
 
-	accessToken := s.jwtService.GenerateAccessToken(refreshToken.UserID.String(), refreshToken.User.Role)
+	accessToken := s.jwtService.GenerateAccessToken(refreshToken.TenantID.String(), refreshToken.UserID.String(), refreshToken.User.Role)
 	newRefreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
 	err = s.refreshTokenRepository.DeleteByToken(ctx, s.db, req.RefreshToken)
