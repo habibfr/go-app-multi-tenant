@@ -62,7 +62,11 @@ func (c *userController) Register(ctx *gin.Context) {
 }
 
 func (c *userController) GetAllUser(ctx *gin.Context) {
-	var filter = &query.UserFilter{}
+	tenantId := ctx.MustGet("tenant_id").(string)
+	var filter = &query.UserFilter{
+		TenantID: tenantId,
+		Name:     ctx.Query("name"), // ambil parameter name dari query string
+	}
 	filter.BindPagination(ctx)
 
 	ctx.ShouldBindQuery(filter)
