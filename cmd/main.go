@@ -6,6 +6,7 @@ import (
 
 	"github.com/Caknoooo/go-gin-clean-starter/middlewares"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/auth"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/product"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/tenant"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user"
 	"github.com/Caknoooo/go-gin-clean-starter/providers"
@@ -60,12 +61,18 @@ func main() {
 	}
 
 	server := gin.Default()
+
+	// Atur trusted proxies, misal hanya localhost dan IP proxy tertentu
+	server.SetTrustedProxies([]string{"127.0.0.1"})
+
+	// Enable CORS middleware
 	server.Use(middlewares.CORSMiddleware())
 
 	// Register module routes
 	user.RegisterRoutes(server, injector)
 	auth.RegisterRoutes(server, injector)
 	tenant.RegisterRoutes(server, injector)
+	product.RegisterRoutes(server, injector)
 
 	run(server)
 }
