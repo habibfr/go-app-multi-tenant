@@ -10,9 +10,24 @@ func Migrate(db *gorm.DB) error {
 		&entities.Tenant{},
 		&entities.User{},
 		&entities.RefreshToken{},
+		&entities.Product{},
 	); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func MigrateFresh(db *gorm.DB) error {
+	// Drop tables
+	if err := db.Migrator().DropTable(
+		&entities.Tenant{},
+		&entities.User{},
+		&entities.RefreshToken{},
+		&entities.Product{},
+	); err != nil {
+		return err
+	}
+	// Migrate ulang
+	return Migrate(db)
 }

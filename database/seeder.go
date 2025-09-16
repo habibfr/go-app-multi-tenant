@@ -9,6 +9,7 @@ func Seeder(db *gorm.DB) error {
 	seeders := []func(*gorm.DB) error{
 		seeds.ListTenantSeeder,
 		seeds.ListUserSeeder,
+		seeds.ListProductSeeder,
 	}
 
 	for _, seeder := range seeders {

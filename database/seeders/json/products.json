@@ -1,0 +1,42 @@
+[
+  {
+    "name": "MacBook Pro",
+    "price": 10000,
+    "tenant_name": "Tenant A"
+  },
+  {
+    "name": "iPhone 13",
+    "price": 5000,
+    "tenant_name": "Tenant B"
+  },
+  {
+    "name": "Laptop Pro",
+    "price": 13000.99,
+    "tenant_name": "Tenant A"
+  },
+  {
+    "name": "iPhone 11",
+    "price": 7000.99,
+    "tenant_name": "Tenant B"
+  },
+  {
+    "name": "MacBook Pro M1",
+    "price": 10000.15,
+    "tenant_name": "Tenant A"
+  },
+  {
+    "name": "iPhone 10",
+    "price": 5000.99,
+    "tenant_name": "Tenant B"
+  },
+  {
+    "name": "MacBook Pro M2",
+    "price": 90000.99,
+    "tenant_name": "Tenant A"
+  },
+  {
+    "name": "iPhone 14",
+    "price": 20000.15,
+    "tenant_name": "Tenant B"
+  }
+]
