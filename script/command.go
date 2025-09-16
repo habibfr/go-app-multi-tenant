@@ -20,6 +20,7 @@ func Commands(injector *do.Injector) bool {
 	seed := false
 	run := false
 	scriptFlag := false
+	fresh := false
 
 	for _, arg := range os.Args[1:] {
 		if arg == "--migrate" {
@@ -31,13 +32,21 @@ func Commands(injector *do.Injector) bool {
 		if arg == "--run" {
 			run = true
 		}
+		if arg == "--fresh" {
+			fresh = true
+		}
 		if strings.HasPrefix(arg, "--script:") {
 			scriptFlag = true
 			scriptName = strings.TrimPrefix(arg, "--script:")
 		}
 	}
 
-	if migrate {
+	if fresh {
+		if err := database.MigrateFresh(db); err != nil {
+			log.Fatalf("error migrate fresh: %v", err)
+		}
+		log.Println("fresh migration completed successfully")
+	} else if migrate {
 		if err := database.Migrate(db); err != nil {
 			log.Fatalf("error migration: %v", err)
 		}
