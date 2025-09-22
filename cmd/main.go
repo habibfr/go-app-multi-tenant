@@ -9,9 +9,12 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/modules/product"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/tenant"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/scheduler"
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/providers"
 	"github.com/Caknoooo/go-gin-clean-starter/script"
 	"github.com/samber/do"
+	"gorm.io/gorm"
 
 	// "github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
@@ -61,6 +64,8 @@ func main() {
 	}
 
 	server := gin.Default()
+	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
+	scheduler.Start(db)
 
 	// Atur trusted proxies, misal hanya localhost dan IP proxy tertentu
 	server.SetTrustedProxies([]string{"127.0.0.1"})
